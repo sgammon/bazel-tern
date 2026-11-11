@@ -2,7 +2,9 @@
 
 Native Bazel build and test dashboards for [Tern](https://stencil.so/tern). Use your usual `bazel`, `bazelisk`, or `bb` commands—no `.bazelrc` changes required.
 
-[Watch the 20-second demo](https://github.com/sgammon/bazel-tern/blob/main/media/tern-bazel-demo.mp4) · [Download the plugin](https://github.com/sgammon/bazel-tern/releases/latest) · [Full guide](docs/usage.md)
+[Watch the demo](https://github.com/sgammon/bazel-tern/blob/main/media/tern-bazel-demo.mp4) · [Download the plugin](https://github.com/sgammon/bazel-tern/releases/latest) · [Full guide](docs/usage.md)
+
+[![Bazel in Tern: execution and cache results, colored logs, and shell handoff](https://raw.githubusercontent.com/sgammon/bazel-tern/main/media/tern-bazel-preview.png)](https://github.com/sgammon/bazel-tern/blob/main/media/tern-bazel-demo.mp4)
 
 - **While building:** live throughput, action progress, contextual test results, and colored logs.
 - **On success:** execution/cache charts, action types, and phase timings when Bazel reports them.
