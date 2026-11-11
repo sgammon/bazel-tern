@@ -1,0 +1,46 @@
+{
+  "name": "tern-bazel",
+  "version": "0.4.0",
+  "description": "Bazel builds and tests as a native Tern surface, alongside BuildBuddy.",
+  "type": "module",
+  "bin": {
+    "tern-bazel": "bin/tern-bazel.mjs"
+  },
+  "files": [
+    "bin",
+    "dist",
+    "README.md",
+    "docs",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx --test test/*.test.ts",
+    "check": "tsc --noEmit",
+    "demo": "tsx src/cli.ts --demo",
+    "prepare": "npm run build",
+    "package:plugin": "node scripts/package-plugin.mjs",
+    "install:plugin": "npm run package:plugin && tern plugin install ./release/bazel --force",
+    "pretest": "npm run package:plugin"
+  },
+  "dependencies": {
+    "@stencil-hq/tern": "0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sgammon/bazel-tern.git"
+  },
+  "homepage": "https://github.com/sgammon/bazel-tern#readme",
+  "bugs": {
+    "url": "https://github.com/sgammon/bazel-tern/issues"
+  }
+}

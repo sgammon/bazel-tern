@@ -1,0 +1,10 @@
+import { build } from 'esbuild';
+import { cp, mkdir, rm } from 'node:fs/promises';
+await rm('release/bazel',{recursive:true,force:true});
+await mkdir('release/bazel',{recursive:true});
+await cp('plugin','release/bazel',{recursive:true});
+await build({entryPoints:['src/dispatch.ts'],outfile:'release/bazel/dispatch.mjs',bundle:true,platform:'node',format:'esm',target:'node22',legalComments:'eof'});
+await cp('README.md','release/bazel/README.md');
+await cp('docs','release/bazel/docs',{recursive:true});
+await cp('THIRD_PARTY_NOTICES.md','release/bazel/THIRD_PARTY_NOTICES.md');
+console.log('Installable Tern plugin: release/bazel');
