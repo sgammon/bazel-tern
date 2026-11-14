@@ -10,7 +10,7 @@ import { QueryState } from './query.js';
 import { dashboard, launched, queryView, type ViewState } from './view.js';
 import { responsiveLayout } from './layout.js';
 
-const VERSION='0.4.0';
+const VERSION='0.5.0';
 const HELP=`tern-bazel — native Bazel builds, runs and queries in Tern, alongside BuildBuddy
 
 Usage: tern-bazel [wrapper options] [--] <bazel arguments...>
