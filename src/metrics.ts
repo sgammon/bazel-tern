@@ -34,3 +34,15 @@ export function reportedDetails(metrics:any):{actionTypes:MetricPoint[];timings:
   ].filter(p=>p.value>0);
   return {actionTypes,timings};
 }
+
+/** Whole-build durations in ms, beside the phases: what the machines spent and the longest dependent chain. */
+export function reportedTotals(metrics:any):MetricPoint[] {
+  const timing=metrics?.timingMetrics;
+  // Durations arrive as proto JSON (`"4.870s"`) or as `{seconds, nanos}`.
+  const seconds=(value:unknown)=>typeof value==='string'&&/^\d+(\.\d+)?s$/.test(value)?Number(value.slice(0,-1))*1000
+    :value&&typeof value==='object'?positive((value as any).seconds)*1000+positive((value as any).nanos)/1e6:0;
+  return [
+    {label:'Critical path',value:seconds(timing?.criticalPathTime)},
+    {label:'CPU time',value:positive(timing?.cpuTimeInMs)},
+  ].filter(p=>Number.isFinite(p.value)&&p.value>0);
+}

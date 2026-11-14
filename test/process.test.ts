@@ -15,8 +15,9 @@ test('wrapper preserves child output, exit status, BuildBuddy flags and applicat
     assert.match(run.stdout,/compiler output/); assert.match(run.stderr,/https:\/\/bb.example\/invocation\/123/);
     const args=JSON.parse(await readFile(join(dir,'args'),'utf8'));
     assert.equal(args[0],'--output_base=/tmp/test'); assert.equal(args[1],'test');
-    assert.ok(args[2].startsWith('--build_event_json_file='));
-    assert.deepEqual(args.slice(3),['//...','--bes_backend=grpcs://bb.example','--','--my-test-arg']);
+    assert.deepEqual(args.slice(2,4),['//...','--bes_backend=grpcs://bb.example']);
+    assert.ok(args[4].startsWith('--build_event_json_file='));
+    assert.deepEqual(args.slice(5),['--','--my-test-arg']);
   } finally { await rm(dir,{recursive:true,force:true}); }
 });
 
@@ -44,5 +45,31 @@ test('growing BEP file is consumed during native-less execution and a user event
     const run=spawnSync(process.execPath,['--import','tsx','src/cli.ts','--plain','--bazel',fake,'--','build','//...','--build_event_json_file='+bep],{encoding:'utf8',timeout:10000});
     assert.equal(run.status,0,run.stderr);assert.match(await readFile(bep,'utf8'),/new-build/);
     assert.doesNotMatch(run.stderr,/No local build events/);
+  }finally{await rm(dir,{recursive:true,force:true});}
+});
+
+test('without a surface, query and run are exactly the original command: arguments, streams and status', async () => {
+  const dir=await mkdtemp(join(tmpdir(),'tern-bazel-pass-'));
+  try {
+    const fake=join(dir,'bazel');
+    await writeFile(fake, `#!/usr/bin/env node\nconst fs=require('fs'); fs.writeFileSync(process.env.ARGS,JSON.stringify(process.argv.slice(2))); process.stdout.write('//app:server\\n//app:lib\\n'); console.error('Loading: 2 packages loaded'); process.exit(process.argv[2]==='run'?9:0);`,{mode:0o755});
+    for(const [args,status] of [[['query','deps(//app:server)'],0],[['cquery','//app:server','--output=label_kind'],0],[['run','//app:server','--','--port','8080'],9]] as const) {
+      const run=spawnSync(process.execPath,['--import','tsx','src/cli.ts','--plain','--bazel',fake,'--',...args],{encoding:'utf8',env:{...process.env,ARGS:join(dir,'args')},timeout:10000});
+      assert.equal(run.status,status,run.stderr);
+      assert.equal(run.stdout,'//app:server\n//app:lib\n');assert.equal(run.stderr,'Loading: 2 packages loaded\n');
+      assert.deepEqual(JSON.parse(await readFile(join(dir,'args'),'utf8')),args);
+    }
+  } finally { await rm(dir,{recursive:true,force:true}); }
+});
+
+test('an event file configured in an rc file is still written, from the one the wrapper reads', async () => {
+  const dir=await mkdtemp(join(tmpdir(),'tern-bazel-rc-'));
+  try {
+    const fake=join(dir,'bazel'), theirs=join(dir,'out','events.json');
+    // Bazel honours the last flag (the wrapper's) and reports every one it parsed, as a real run with --config does.
+    await writeFile(fake,`#!/usr/bin/env node\nconst fs=require('fs'); const path=process.argv.filter(a=>a.startsWith('--build_event_json_file=')).at(-1).slice(24); fs.writeFileSync(path,[{started:{uuid:'u'}},{optionsParsed:{cmdLine:['--build_event_json_file=${theirs}','--build_event_json_file='+path]}},{finished:{exitCode:{code:0}}}].map(e=>JSON.stringify(e)).join('\\n')+'\\n');`,{mode:0o755});
+    const run=spawnSync(process.execPath,['--import','tsx','src/cli.ts','--plain','--bazel',fake,'--','test','--config=upstream','//suite'],{encoding:'utf8',timeout:10000});
+    assert.equal(run.status,0,run.stderr);
+    assert.match(await readFile(theirs,'utf8'),/"uuid":"u"/);assert.doesNotMatch(run.stderr,/No local build events|Could not write/);
   }finally{await rm(dir,{recursive:true,force:true});}
 });

@@ -1,17 +1,25 @@
 # bazel-tern
 
-Native Bazel build and test dashboards for [Tern](https://stencil.so/tern). Use your usual `bazel`, `bazelisk`, or `bb` commands—no `.bazelrc` changes required.
+Native Bazel build, test, run and query views for [Tern](https://stencil.so/tern). Use your usual `bazel`, `bazelisk`, or `bb` commands—no `.bazelrc` changes required.
 
 [Download the plugin](https://github.com/sgammon/bazel-tern/releases/latest) · [Full guide](docs/usage.md)
 
-![Bazel in Tern: execution and cache results, colored logs, and shell handoff](https://raw.githubusercontent.com/sgammon/bazel-tern/main/media/tern-bazel-preview.png)
+<picture>
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/sgammon/bazel-tern/main/media/tern-bazel-preview-light.png">
+  <img alt="A finished Bazel build in Tern: action, target and cache tiles, execution mix and action type charts, phase timings, and the build log folded to its last line above the returned prompt" src="https://raw.githubusercontent.com/sgammon/bazel-tern/main/media/tern-bazel-preview.png">
+</picture>
 
-- **While building:** live throughput, action progress, contextual test results, and colored logs.
-- **On success:** execution/cache charts, action types, and phase timings when Bazel reports them.
-- **On failure:** preserved error details and test logs, with BuildBuddy and the returned shell prompt in view.
+- **Tests:** pass rate, failures, results over time, the suite as a grid, and failures by area with the tests behind them, live while Bazel is still discovering targets.
+- **While building:** action progress and throughput, test results as they report in, and the log folded to its latest line until you open it.
+- **On success:** actions, targets and cache tiles, then execution mix, action types, and timings when Bazel reports them.
+- **On failure:** the first errors and failed tests in one card, with test logs, the full log and BuildBuddy a click away.
+- **`bazel run`:** the same view while the target builds, then one line of facts and the terminal is your program's: its input, colors and exit status.
+- **`bazel query` and `cquery`:** results as a table with rule kinds, counts and a breakdown by kind. Piped queries and other `--output` formats print exactly as before.
 - **BuildBuddy friendly:** existing BES, authentication, remote execution, and cache settings pass through. Detected invocations get contextual shortcuts.
 
-The layout adapts to the pane. Small panes use compact metrics and sparklines; wider panes get richer native charts.
+<img alt="A test run in Tern: pass rate and failure tiles, passed and failed tests over time, a grid of the suite, where results were cached, and failures by area beside the failing tests of the selected area" src="https://raw.githubusercontent.com/sgammon/bazel-tern/main/media/tern-bazel-tests.png">
+
+The layout adapts to the pane. Small panes use one line of metrics and a sparkline; wider panes get tiles and native charts.
 
 ## Install
 
@@ -29,6 +37,8 @@ Open a **new Tern tab** and build normally:
 ```sh
 bazel build //...
 bazel test //...
+bazel run //app:server -- --port 8080
+bazel query 'deps(//app:server)'
 bb test //...
 ```
 
@@ -49,7 +59,10 @@ Preview without submitting a build:
 
 ```sh
 npm run demo -- build  # successful build
-npm run demo          # failed test and shell handoff
+npm run demo -- run    # build, then a program on the terminal
+npm run demo -- query  # query results
+npm run demo           # a test suite with failures
+npx tsx src/cli.ts --replay events.json test //...  # play back a saved build event file
 ```
 
 The simulated test demo intentionally exits with status 3. The standalone helper is `tern-bazel`; build it with `npm run build` and use `npm link` to put it on PATH.

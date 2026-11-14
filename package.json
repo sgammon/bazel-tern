@@ -1,7 +1,7 @@
 {
   "name": "tern-bazel",
   "version": "0.4.0",
-  "description": "Bazel builds and tests as a native Tern surface, alongside BuildBuddy.",
+  "description": "Bazel builds, tests, runs and queries as native Tern surfaces, alongside BuildBuddy.",
   "type": "module",
   "bin": {
     "tern-bazel": "bin/tern-bazel.mjs"
